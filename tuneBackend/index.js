@@ -56,9 +56,12 @@ app.get(path + 'tunes', (req, res) =>{// add filter here
     return res.status(200).json(tunes);
 });
 
-app.get(path + 'tunes/:id', (req, res) =>{
+app.get(path + 'genres/:genreid/tunes/:id', (req, res) =>{
     if (isNaN(req.params.id)){
         return res.status(400).json({'message': 'Error: id must be a number'})
+    }
+    if (isNaN(req.params.genreid)){
+        return res.status(400).json({'message': 'Error: genreid must be a number'})
     }
     for (let i = 0; i < tunes.length; i++) {
         if (tunes[i].id == req.params.id) {
@@ -110,7 +113,9 @@ app.post(path + 'genres', (req, res) =>{
     newGenreId++
     return res.status(200).json(newGenre)
 })
+app.delete(path + 'genres', (req, res) => {
 
+})
 //Start the server
 app.listen(port, () => {
     console.log('Tune app listening on port + ' + port);
