@@ -44,7 +44,7 @@ let genres = [
 ];
 
 //Your endpoints go here
-app.get(path + 'tunes', (req, res) =>{// add filter here
+app.get(path + 'tunes', (req, res) =>{
     const genreName = req.query.filter;
     const genre = genres.find(genre => genre.genreName === genreName);
     if (genreName && !genre) {
@@ -101,7 +101,7 @@ app.post(path + 'genres', (req, res) =>{
             return res.status(400).json({'Message': 'genre name required'})
         }
     for (let i = 0; i < genres.length; i++){
-        if(genres[i].genreName == req.body.genreName){ //         check case sensitivity
+        if(genres[i].genreName.toLowerCase() == req.body.genreName.toLowerCase()){ //         check case sensitivity
             return res.status(400).json({'Message': 'genre already exists'})
         }
     }
@@ -109,12 +109,35 @@ app.post(path + 'genres', (req, res) =>{
         id: newGenreId,
         genreName: req.body.genreName
     }
-    genres.push(newGenre)
-    newGenreId++
-    return res.status(200).json(newGenre)
+    genres.push(newGenre);
+    newGenreId++;
+    return res.status(201).json(newGenre);
 })
-app.delete(path + 'genres', (req, res) => {
 
+app.delete(path + 'genres', (req, res) => {
+    if (req.body == undefined ||
+        req.body.genreId == undefined)
+        {
+            return res.status(400).json({'Message': 'genre id required'})
+        }
+    var genreid = req.body.genreId
+    for (let i = 0; i < genres.length; i++){
+        if(genres[i].id == genreid){
+            for(let j = 0; j < tunes.length; j++){
+                if(tunes[j].genreId == genreid){
+                    return res.status(400).json({'Message': 'Cannot delete genre that has tunes'})
+                }
+                let removedGenre = genres[i] 
+                genres.splice(i, 1)
+                return res.status(200).json({removedGenre})
+            }
+        }
+    return res.status(404).json({'Message': `genre with id ${genreid} not found`})
+    }
+
+})
+app.use('*', (req, res) =>{
+    res.status(405).send('Operation not supported.')
 })
 //Start the server
 app.listen(port, () => {
