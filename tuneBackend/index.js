@@ -136,9 +136,38 @@ app.delete(path + 'genres', (req, res) => {
     }
 
 })
+
+
+const allowedKeys = ['name', 'content']
+
+app.patch(path + "genres/:genreid/tunes/:id", (req,res) => {//id !change,
+    const id = req.params.id;
+    const changes = req.body;
+
+    const originalIndex = tunes.findIndex(tune => tune.id === id);
+    if(originalIndex === -1) {
+        return res.status(404).json({'message': 'Error'})
+    }
+    
+    const original = tunes[originalIndex];
+    
+    Object.keys(changes).forEach(key => {
+        if (allowedKeys.includes(key)) {
+            original[key] = changes[key];
+        } else {
+            return res.status(404).json({'message': 'Error invalid key'})
+        }
+    })
+
+    console.log(JSON.stringify(original));
+
+    return res.status(200).json(original);
+})
+
 app.use('*', (req, res) =>{
     res.status(405).send('Operation not supported.')
 })
+
 //Start the server
 app.listen(port, () => {
     console.log('Tune app listening on port + ' + port);
