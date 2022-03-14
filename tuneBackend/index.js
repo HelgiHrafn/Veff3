@@ -13,7 +13,7 @@ const app = express();
 
 //Port environment variable already set up to run on Heroku
 let port = process.env.PORT || 3000;
-
+const path = '/api/v1/'
 //Tell express to use the body parser module
 app.use(bodyParser.json());
 
@@ -43,12 +43,12 @@ let genres = [
 ];
 
 //Your endpoints go here
-app.get('/tunes', (req, res) =>{// add filter here
+app.get(path + 'tunes', (req, res) =>{// add filter here
     return res.status(200).json(tunes)
     //error handling?
 });
 
-app.get('/tunes/:id', (req, res) =>{
+app.get(path + 'tunes/:id', (req, res) =>{
     if (isNaN(req.params.id)){
         return res.status(400).json({'message': 'Error: id must be a number'})
     }
@@ -60,10 +60,13 @@ app.get('/tunes/:id', (req, res) =>{
     return res.status(404).json({'message':'Error: Event with id '+ req.params.id + ' not found.'})
 });
 
-app.post('/tunes', (req, res) => {
-    
+app.post(path + "genres/:genreid/tunes", (req, res) => {
+    console.log(req)
     
 });
+app.get(path + 'genres', (req, res) =>{ // error handling
+    return res.status(200).json(genres)
+})
 //Start the server
 app.listen(port, () => {
     console.log('Tune app listening on port + ' + port);
