@@ -10,8 +10,7 @@ const req = require('express/lib/request')
 
 const app = express();
 
-const apiPath = '/api/'
-const version = 'v1'
+
 //Port environment variable already set up to run on Heroku
 let port = process.env.PORT || 3000;
 
@@ -44,11 +43,12 @@ let genres = [
 ];
 
 //Your endpoints go here
-app.get(apiPath + version + '/tunes', (req, res) =>{
+app.get('/tunes', (req, res) =>{// add filter here
     return res.status(200).json(tunes)
+    //error handling?
 });
 
-app.get(apiPath + version + '/tunes/:id', (req, res) =>{
+app.get('/tunes/:id', (req, res) =>{
     if (isNaN(req.params.id)){
         return res.status(400).json({'message': 'Error: id must be a number'})
     }
@@ -60,7 +60,7 @@ app.get(apiPath + version + '/tunes/:id', (req, res) =>{
     return res.status(404).json({'message':'Error: Event with id '+ req.params.id + ' not found.'})
 });
 
-app.post(apiPath + version + '/tunes', (req, res) => {
+app.post('/tunes', (req, res) => {
     
     
 });
