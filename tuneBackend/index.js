@@ -28,6 +28,7 @@ app.use(function(req, res, next) {
   });
 
 //The following is an example of an array of two tunes.  Compared to assignment 2, I have shortened the content to make it readable
+var nextTuneId = 2
 var tunes = [
     { id: '0', name: "Für Elise", genreId: '1', content: [{note: "E5", duration: "8n", timing: 0},{ note: "D#5", duration: "8n", timing: 0.25},{ note: "E5", duration: "8n", timing: 0.5},{ note: "D#5", duration: "8n", timing: 0.75},
     { note: "E5", duration: "8n", timing: 1}, { note: "B4", duration: "8n", timing: 1.25}, { note: "D5", duration: "8n", timing: 1.5}, { note: "C5", duration: "8n", timing: 1.75},
@@ -36,7 +37,7 @@ var tunes = [
     { id: '3', name: "Seven Nation Army", genreId: '0', 
     content: [{note: "E5", duration: "4n", timing: 0}, {note: "E5", duration: "8n", timing: 0.5}, {note: "G5", duration: "4n", timing: 0.75}, {note: "E5", duration: "8n", timing: 1.25}, {note: "E5", duration: "8n", timing: 1.75}, {note: "G5", duration: "4n", timing: 1.75}, {note: "F#5", duration: "4n", timing: 2.25}] }
 ];
-
+var newGenreId = 2
 let genres = [
     { id: '0', genreName: "Rock"},
     { id: '1', genreName: "Classic"}
@@ -44,8 +45,15 @@ let genres = [
 
 //Your endpoints go here
 app.get(path + 'tunes', (req, res) =>{// add filter here
-    return res.status(200).json(tunes)
-    //error handling?
+    const genreName = req.query.filter;
+    const genre = genres.find(genre => genre.genreName === genreName);
+    if (genreName && !genre) {
+        return res.status(404).json({'message': `Error ${genreName} not found in list of available genres`})
+    }
+    if (genre) {
+        return res.status(200).json(tunes.filter(tune => tune.genreId === genre.id));
+    }
+    return res.status(200).json(tunes);
 });
 
 app.get(path + 'tunes/:id', (req, res) =>{
@@ -61,13 +69,63 @@ app.get(path + 'tunes/:id', (req, res) =>{
 });
 
 app.post(path + "genres/:genreid/tunes", (req, res) => {
-    console.log(req)
-    
+    if (req.body == undefined ||
+        req.body.name == undefined ||
+        req.body.content == undefined){
+            return res.status(400).json({'Message': 'tune name and content (notes) required'})
+        }
+    let newTune = {
+        id: nextTuneId,
+        name: req.body.name,
+        genreId: req.params.genreid,
+        content: req.body.content
+    }
+    tunes.push(newTune)
+
+    nextTuneId++
+
+    return res.status(201).json(newTune)
 });
+
 app.get(path + 'genres', (req, res) =>{ // error handling
     return res.status(200).json(genres)
 })
+
+app.post(path + 'genres', (req, res) =>{
+    if (req.body == undefined ||
+        req.body.genreName == undefined)
+        {
+            return res.status(400).json({'Message': 'genre name required'})
+        }
+    for (let i = 0; i < genres.length; i++){
+        if(genres[i].genreName == req.body.genreName){ //         check case sensitivity
+            return res.status(400).json({'Message': 'genre already exists'})
+        }
+    }
+    let newGenre = {
+        id: newGenreId,
+        genreName: req.body.genreName
+    }
+    genres.push(newGenre)
+    newGenreId++
+    return res.status(200).json(newGenre)
+})
+
 //Start the server
 app.listen(port, () => {
     console.log('Tune app listening on port + ' + port);
 });
+
+
+// app.patch(path + 'tunes/:id', (req,res) => {//id !change,
+//     const { id, genreID } = req.parameter;
+//     const changes = req.body;
+
+//     const original = tunes.find(tune => tune.id === id);
+
+//     const updateTune = {...original, ...changes};
+
+//     console.log(JSON.stringify(updateTune));
+
+//     return res.status(200).json(updateTune);
+// })
